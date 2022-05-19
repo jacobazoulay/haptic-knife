@@ -1,10 +1,13 @@
 //------------------------------------------------------------------------------------------
 // Parameters that define what environment to render
-#define ENABLE_VIRTUAL_WALL
+//#define ENABLE_VIRTUAL_WALL
 //#define ENABLE_VIRTUAL_WALL_SYSTEM
 //#define ENABLE_LINEAR_DAMPING
 //#define ENABLE_BUMP_VALLEY
 //#define BILATERAL
+//#define CARROT_RESTORE
+#define CUTTING_BOARD
+#define CUTTING_CARROT
 
 // Includes
 #include <math.h>
@@ -80,6 +83,10 @@ double b = 1;
 double k = 300;
 double kuser = 1000;
 double x_m_eq =  0.01 ;
+
+// Carrot Variables
+double max_x;
+
 
 // Special variables for efficient transmission over serial
 // We use a union so that the binary form of the integer shares the same memory space as the int form
@@ -353,6 +360,65 @@ void loop()
       }
      #endif
 
+
+     #ifdef CARROT_RESTORE
+
+         force = 0.3;
+         Serial.println(xh);
+
+     #endif
+
+
+     
+     #ifdef CUTTING_BOARD
+
+        // define wall position and spring constant
+        double x_wall = 0.000;
+        double k = 400.0;
+        Serial.println(xh, 5);
+        
+        // if the handle position is past the wall position, then apply restorative spring force 
+        if(xh > x_wall){
+            force = -k * (xh - x_wall);
+        } else {
+            force = 0;
+        }
+
+     #endif
+
+
+     #ifdef CUTTING_CARROT
+
+        // define wall position and spring constant
+        double x_carrot = -0.03;
+        double k_carrot = 1000.0;
+        double thick = 0.01;
+        bool outside;
+        
+
+        if(xh < x_carrot){
+            outside = true;
+            max_x = x_carrot;
+        }  else if(xh > x_carrot+thick){
+            outside= false;
+        }
+
+        if(xh > max_x && xh < 0.0){
+            max_x = xh;
+            double b_carrot = 1.0;
+            force = -1.0;
+        }
+        
+        // if the handle position is past the wall position, then apply restorative spring force 
+        if(xh > x_carrot && xh < x_carrot + thick && outside){
+            force = -k_carrot * (xh - x_carrot);
+        } else {
+//            force = 0;
+        }
+
+        
+
+     #endif
 
     //*************************************************************
     //*** Section 3. Assign a motor output force in Newtons *******  
