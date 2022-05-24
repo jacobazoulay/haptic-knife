@@ -5,9 +5,9 @@
 //#define ENABLE_LINEAR_DAMPING
 //#define ENABLE_BUMP_VALLEY
 //#define BILATERAL
-//#define CARROT_RESTORE
-#define CUTTING_BOARD
-#define CUTTING_CARROT
+#define CARROT_RESTORE
+//#define CUTTING_BOARD
+//#define CUTTING_CARROT
 
 // Includes
 #include <math.h>
@@ -86,6 +86,8 @@ double x_m_eq =  0.01 ;
 
 // Carrot Variables
 double max_x;
+double x_carrot_min = 2;
+bool outside;
 
 
 // Special variables for efficient transmission over serial
@@ -227,24 +229,24 @@ void loop()
     //** Teleop Communication. Send and receive handle positions.**
     //*************************************************************
     //--------------------------------------------------------------------------------------------------------------------
-    if (sending && Serial.availableForWrite()> sizeof(int)){ //check that we have space in the serial buffer to write
-        xh_bin.integer = int(xh*100000.0); // save space by using a integer representation
-        Serial.write(xh_bin.binary,2); // write the integer to serial
-        sending = false; // flip the tx/rx flags
-        receiving = true;
-        Serial.flush(); // flush the serial for good measure
-    }
-    // read our follower position
-    if (receiving && Serial.available()> 1){ //if there is at least 2 bytes of data to read from the serial
-        xh_remote_prev = xh_remote; // backup old follower position
-        Serial.readBytes(xh_remote_bin.binary,2); // read the bytes in
-        xh_remote = (float)xh_remote_bin.integer/100000.0; // convert the integer back into a float
-        if (isnan(xh_remote)) //if xh_2 is corrupt, just use the old value
-          xh_remote = xh_remote_prev;
-        sending = true; // flip the tx/rx flags
-        receiving = false;
-        Serial.flush(); // flush the serial for good measure
-    }
+//    if (sending && Serial.availableForWrite()> sizeof(int)){ //check that we have space in the serial buffer to write
+//        xh_bin.integer = int(xh*100000.0); // save space by using a integer representation
+//        Serial.write(xh_bin.binary,2); // write the integer to serial
+//        sending = false; // flip the tx/rx flags
+//        receiving = true;
+//        Serial.flush(); // flush the serial for good measure
+//    }
+//    // read our follower position
+//    if (receiving && Serial.available()> 1){ //if there is at least 2 bytes of data to read from the serial
+//        xh_remote_prev = xh_remote; // backup old follower position
+//        Serial.readBytes(xh_remote_bin.binary,2); // read the bytes in
+//        xh_remote = (float)xh_remote_bin.integer/100000.0; // convert the integer back into a float
+//        if (isnan(xh_remote)) //if xh_2 is corrupt, just use the old value
+//          xh_remote = xh_remote_prev;
+//        sending = true; // flip the tx/rx flags
+//        receiving = false;
+//        Serial.flush(); // flush the serial for good measure
+//    }
     
     //*************************************************************
     //*** Section 3. Assign a motor output force in Newtons *******  
@@ -364,7 +366,7 @@ void loop()
      #ifdef CARROT_RESTORE
 
          force = 0.3;
-         Serial.println(xh);
+         Serial.println(xh, 5);
 
      #endif
 
@@ -375,14 +377,12 @@ void loop()
         // define wall position and spring constant
         double x_wall = 0.000;
         double k = 400.0;
-        Serial.println(xh, 5);
+//        Serial.println(xh, 5);
         
         // if the handle position is past the wall position, then apply restorative spring force 
         if(xh > x_wall){
             force = -k * (xh - x_wall);
-        } else {
-            force = 0;
-        }
+        } 
 
      #endif
 
@@ -393,30 +393,38 @@ void loop()
         double x_carrot = -0.03;
         double k_carrot = 1000.0;
         double thick = 0.01;
-        bool outside;
+        Serial.println(xh, 5);
         
 
-        if(xh < x_carrot){
-            outside = true;
-            max_x = x_carrot;
-        }  else if(xh > x_carrot+thick){
-            outside= false;
+          // cut rendering for single stationary x position
+          // checks if cut has been made and if carrot has been pushed passed current max depth
+          if(xh < x_carrot){
+            if(xh_remote < x_carrot_min) {
+                outside = true;
+            }
+              max_x = x_carrot;
+          }  else if(xh > x_carrot+thick){
+              outside= false;
+         
+          }
+  
+//          if(xh > max_x && xh < 0.0){
+//              max_x = xh;
+//              double b_carrot = 1.0;
+//              force = -1.0;
+//          }
+          
+          // if the handle position is past the wall position, then apply restorative spring force 
+          if(xh > x_carrot && xh < x_carrot + thick && outside){
+              force = -k_carrot * (xh - x_carrot);
+             
+          } else {
+            force = 0;
         }
 
-        if(xh > max_x && xh < 0.0){
-            max_x = xh;
-            double b_carrot = 1.0;
-            force = -1.0;
-        }
-        
-        // if the handle position is past the wall position, then apply restorative spring force 
-        if(xh > x_carrot && xh < x_carrot + thick && outside){
-            force = -k_carrot * (xh - x_carrot);
-        } else {
-//            force = 0;
-        }
-
-        
+          if(xh_remote < x_carrot_min) {
+//            x_carrot_min = xh_remote;
+          }
 
      #endif
 
