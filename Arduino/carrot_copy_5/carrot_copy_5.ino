@@ -80,7 +80,7 @@ double F_damping = 0;
 double x_wall = 0.05;
 double m = 2;
 double b = 1;
-double k = 300;
+double k = 400;
 double kuser = 1000;
 double x_m_eq =  0.01 ;
 
@@ -90,7 +90,9 @@ double x_carrot_min = 2;
 bool outside;
 String in_string;
 String xh_remote_temp;
-
+char can_cut;
+char can_move;
+char can_move_prev;
 
 // Special variables for efficient transmission over serial
 // We use a union so that the binary form of the integer shares the same memory space as the int form
@@ -367,28 +369,39 @@ void loop()
 
 
      #ifdef CARROT_RESTORE
-        in_string = Serial.readStringUntil('\n');
-//        in_string = "0.1234";
-
-//        if (in_string != NULL && in_string.charAt(0) == 'k') {
-//          xh_remote_temp = in_string.substring(1).toFloat();
-//        }
+        in_string = Serial.readStringUntil('B');
+        float contact;
+//
+        if (in_string != NULL) {
+          can_cut = in_string.charAt(0);
+          can_move = in_string.charAt(1);
+        }
 //
 //        if (xh_remote_temp < 0.01) {
 //          xh_remote = xh_remote_temp;
 //        }
-          if((in_string.length() == 6 && in_string.charAt(1) == '.')|| (in_string.length() == 7 && in_string.charAt(0) == '-' && in_string.charAt(2) == '.')) {
-            xh_remote_temp = in_string;
-          }
-         if (xh_remote < -0.004) {
-          force = -0.5;
+
+//          if((in_string != NULL ) && (in_string.length() == 6 && in_string.charAt(1) == '.')|| (in_string.length() == 7 && in_string.charAt(0) == '-' && in_string.charAt(2) == '.')) {
+//
+//            
+//            xh_remote = in_string.toFloat();
+//          }
+          
+         if (can_move == '0') {
+            if(can_move_prev == '1') {
+               contact = xh;
+            }
+          force = k*(xh - contact + 0.005);
+         } else if(can_move == '1') {
+          force = 0;
          } else {
-          force = 0.5;
+          force = 0;
          }
-         
-//         Serial.println(xh, 5);
+
+         can_move_prev = can_move;
+         Serial.println(xh, 5);
 //           Serial.println(xh_remote, 5);
-            Serial.println(in_string);
+//            Serial.println(in_string);
      #endif
 
 
@@ -410,9 +423,15 @@ void loop()
 
      #ifdef CUTTING_CARROT
 
+        in_string = Serial.readStringUntil('B');
+//
+        if (in_string != NULL) {
+          can_cut = in_string.charAt(0);
+        }
+        
         // define wall position and spring constant
         double x_carrot = -0.03;
-        double k_carrot = 1000.0;
+        double k_carrot = 2000.0;
         double thick = 0.01;
         Serial.println(xh, 4);
         
@@ -436,7 +455,7 @@ void loop()
 //          }
           
           // if the handle position is past the wall position, then apply restorative spring force 
-          if(xh > x_carrot && xh < x_carrot + thick && outside){
+          if(xh > x_carrot && xh < x_carrot + thick && outside && can_cut == '1'){
               force = -k_carrot * (xh - x_carrot);
              
           } else {

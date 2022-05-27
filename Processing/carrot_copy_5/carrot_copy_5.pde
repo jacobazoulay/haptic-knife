@@ -22,6 +22,7 @@ float y_knife;
 float y_knife_prev;
 float x_carrot;
 float x_carrot_prev;
+float x_contact;
 
 float xh_knife_in;
 float xh_carrot_in;
@@ -29,6 +30,11 @@ float xh_carrot_in;
 float y_carrot;
 
 boolean can_cut = false;
+String can_cut_char = "0";
+String can_move = "0";
+String can_move_prev;
+String can = "00B";
+
 
 float[] rots ={};
 float[] trans_xs ={};
@@ -102,21 +108,45 @@ void draw() {
     image(carrot_img_arr.get(i), width / 2 + trans_xs[i-1], trans_ys[i-1]);
     popMatrix();
   }
-  image(carrot_img_arr.get(0), x_carrot, height/2 - full_body.height/2 - 50);
+  if(can_move == "1") {
+    image(carrot_img_arr.get(0), x_carrot, height/2 - full_body.height/2 - 50);
+  } else {
+    image(carrot_img_arr.get(0), x_contact, height/2 - full_body.height/2 - 50);
+  }
   //image(full_body, 0, height/2 - full_body.height/2, full_body.width, full_body.height);
   image(knife, width * 0.5, y_knife);
   
-  if (abs(x_carrot - x_carrot_prev) > 3 && y_knife < y_carrot && x_carrot + full_body.width > width * 0.5) {
+  if (abs(x_carrot - x_carrot_prev) > 3 && y_knife < y_carrot && x_carrot + carrot_img_arr.get(0).width > width * 0.5 && x_carrot < width*0.5) {
     can_cut = true;
-  }
+
+    can_cut_char = "1";
+  } 
   
+  if (x_carrot + carrot_img_arr.get(0).width < width * 0.5 || x_carrot > width*0.5) {
+    can_cut = false;
+    can_cut_char = "0";
+  }
   if (y_knife > y_carrot + 50 && can_cut) {
     can_cut = false;
+    can_cut_char = "0";
     chop_sound.play();
     chops();
   }
   
+  // if knife is up carrot can always move
+  if (y_knife < y_carrot) {
+    can_move = "1";
+  } else if (y_knife > y_carrot && (x_carrot + carrot_img_arr.get(0).width < width *0.5 || x_carrot > width * 0.5)) {
+    can_move = "1";
+  } else {
+    can_move = "0";
+    if(can_move_prev == "1") {
+      x_contact = x_carrot;
+    }
+  }
+  
   x_carrot_prev = x_carrot;
+  can_move_prev = can_move;
 }
 
 
@@ -159,21 +189,41 @@ void serialEvent (Serial thisPort) {
   String inString = thisPort.readStringUntil('\n');
   try {
   // if the string is not empty, do stuff with it:
-  if (inString != null && inString.charAt(0) != 'k' && inString.charAt(0) != 'c') {
+  if (inString != null && inString.length() > 1) {
     // if the string came from serial port one:
     if (thisPort == myPortKnife) {
       //print ("Data from port one: ");
       xh_knife_in = float(inString);
       //myPortCarrot.write("k" + inString);
-      myPortCarrot.write(inString);
+      //print("Test str: ");
+      //println(fixed);
+      //print("from knife : ");
+      //println(inString);
+      //print("can cut val :");
+      //println(can_cut_char);
+      can = can_cut_char + can_move + "B";
+      myPortCarrot.write(can);
+      
+      //myPortCarrot.write(inString + "\n");
     }
     // if the string came from serial port two:
     if (thisPort == myPortCarrot) {
       //print ("Data from port two: ");
       xh_carrot_in = float(inString);
       //myPortKnife.write("c" + inString);
-      myPortKnife.write(inString);
-      print(inString);
+      //myPortCarrot.write(inString + '\n');
+      //String fixed_test = "0.234\n";
+      //myPortKnife.write(inString + "\n");
+      can = can_cut_char + can_move + "B";
+
+      myPortKnife.write(can);
+      
+      println(inString);
+      //String real_test = inString + 'k';
+      //print("real test: ");
+      //println(real_test);
+      //myPortCarrot.write(
+      //print(inString + 'k');
     }
   }
   }catch (Exception e) {
