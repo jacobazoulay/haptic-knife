@@ -5,9 +5,9 @@
 //#define ENABLE_LINEAR_DAMPING
 //#define ENABLE_BUMP_VALLEY
 //#define BILATERAL
-//#define CARROT_RESTORE
+#define CARROT_RESTORE
 //#define CUTTING_BOARD
-#define CUTTING_CARROT
+//#define CUTTING_CARROT
 
 // Includes
 #include <math.h>

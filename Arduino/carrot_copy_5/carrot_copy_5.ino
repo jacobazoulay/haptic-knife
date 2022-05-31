@@ -5,9 +5,9 @@
 //#define ENABLE_LINEAR_DAMPING
 //#define ENABLE_BUMP_VALLEY
 //#define BILATERAL
-#define CARROT_RESTORE
+//#define CARROT_RESTORE
 //#define CUTTING_BOARD
-//#define CUTTING_CARROT
+#define CUTTING_CARROT
 
 // Includes
 #include <math.h>
@@ -391,9 +391,9 @@ void loop()
             if(can_move_prev == '1') {
                contact = xh;
             }
-          force = k*(xh - contact + 0.005);
+          force = k*(xh - contact + 1.2);
          } else if(can_move == '1') {
-          force = 0;
+          force = 1.2;
          } else {
           force = 0;
          }

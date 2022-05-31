@@ -42,7 +42,8 @@ float[] trans_ys ={};
 
 
 void setup() {
-  size(1280, 720);
+  //size(1280, 720);
+  fullScreen();
   full_body = loadImage("carrot.png");
   chopping_board= loadImage("chopping_board.png");
   knife = loadImage("knife.png");
