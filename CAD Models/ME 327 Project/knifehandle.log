@@ -1,0 +1,41 @@
+STEP translation to Solid Edge
+Date: Wednesday,May 18,2022 10:51PM
+Source File: C:\Users\choi01\Documents\ME 327 Project\knifehandle.STP
+Author: Unknown
+Organization: Unknown
+Source System: Autodesk Translation Framework v10.14.0.1471
+
+Hardware:
+Processor: Intel(R) Xeon(R) W-2265 CPU @ 3.50GHz
+Operating System: Windows 10 Enterprise Edition
+Installed Memory: 63.69 GB
+
+Software Information
+Parasolid Version: 33.0.247
+PSBodyShop Version: 33.0.93
+Step Adapter Version: 9.0.104
+Solid Edge Version: 221.00.11.004 x64
+
+Step Import Options
+Import Faceted Bodies: On
+Import Check Bodies: Off
+Import Curves: On
+Import DoNotSave: On
+Import Multiple Bodies As Single Part File: On
+Import Stitch Surfaces: On
+Import Boolean Solids: On
+Make Base Feature: On
+Simplify Geometry: On
+Import Imprint Curves: On
+Import Drive: C:
+Import Stitch Surfaces: On
+Import Surfaces: On
+Import Output Path: C:\Users\choi01\Documents\ME 327 Project
+Import Enable Default Output Path: On
+Import PMI: Off
+Import As Internal Components: Off
+Import Path: 
+
+Translating to Parasolid data types...
+Translation process completed
+Total time required to translate and post process:00 : 00 : 01
