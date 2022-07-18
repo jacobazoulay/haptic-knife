@@ -1,0 +1,25 @@
+STL translation to Solid Edge
+Date: Wednesday,May 18,2022 01:27AM
+Source File:C:\Users\choi01\Documents\ME 327 Project\Knife Handle v19.stl
+Author: Unknown
+Organization: Unknown
+Source System: DEX
+
+Hardware:
+Processor: Intel(R) Xeon(R) W-2265 CPU @ 3.50GHz
+Operating System: Windows 10 Enterprise Edition
+Installed Memory: 63.69 GB
+
+Software Information:
+Parasolid Version: 33.0.247
+PSBodyshop Version: 33.0.93
+Solid Edge Version: 221.00.11.004 x64
+
+STL Import Options
+Heal Mesh Faults:On
+Make Base Feature:On
+Enable Logging:On
+
+Translation progress:
+Translation process completed
+Time required to translate:00 : 00 : 00
